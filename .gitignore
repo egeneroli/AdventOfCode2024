@@ -1,0 +1,39 @@
+# Byte-compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Python eggs
+*.egg
+
+# Python cache files
+*.pycache
+
+# IDE files
+.vscode/
+.pydevproject
+.project
+.settings/
+.idea
+
+# Virtual environment files
+venv/
+env/
+virtualenv/
+
+# Log files
+*.log
+
+# Database files
+*.db
+*.sqlite
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Miscellaneous
+__pycache__/
+*.bak
+*.tmp
+*.swp
