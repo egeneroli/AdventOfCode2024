@@ -1,14 +1,13 @@
-from py.util import read_input
+from py.util import read_input, parse_matrix
 
 # read in data
 lines: list[str] = read_input("input1")
-print(lines[0:10])
+print(f"input: {lines[0:10]}\n")
 
-# parse data
-def parse_data(x: list[str]) -> list[list[int]]:
-    return [[int(x) for x in line.split()] for line in x]
+# parse into nested list of ints
+data: list[list[int]] = parse_matrix(lines)
 
-data: list[list[int]] = parse_data(lines)
+# separate into two lists
 list1: list[int] = [row[0] for row in data]
 list2: list[int] = [row[1] for row in data]
 # print(data[0:10])
@@ -23,17 +22,23 @@ diffs: list[int] = calc_diffs(list1, list2)
 # print(diffs[0:10])
 
 # part 1 solution
-print(f"result 1: {sum(diffs)}\n")
+def part1() -> int:
+    return sum(diffs)
+
+print(f"result 1: {part1()}\n")
 
 ## part 2
 def calc_sim_scores(left: list[int], right: list[int]) -> list[int]:
     return [x * right.count(x) for x in left]
 
 sims: list[int] = calc_sim_scores(list1, list2)
-print(sims[0:10])
+# print(sims[0:10])
 
 # part 2 solution
-print(f"result 2: {sum(sims)}")
+def part2() -> int:
+    return sum(sims)
+
+print(f"result 2: {part2()}")
 
 
 
