@@ -1,11 +1,10 @@
 from py.util import read_input, parse_matrix
 
 # read in data
-lines: list[str] = read_input("input1")
-print(f"input: {lines[0:10]}\n")
+input_str: str = read_input("input2")
 
 # parse into nested list of ints
-data: list[list[int]] = parse_matrix(lines)
+data: list[list[int]] = parse_matrix(input_str.split("\n"))
 
 # separate into two lists
 list1: list[int] = [row[0] for row in data]
