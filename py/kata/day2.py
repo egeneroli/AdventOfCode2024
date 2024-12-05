@@ -41,7 +41,7 @@ def safe_row2(row: list[int]) -> bool:
 
     # check if almost safe (ie. only one level is unsafe)
     for i, level in enumerate(row):
-        # create a copy of the level
+        # create a copy of the row
         level_temp: list[int] = row.copy()
         # remove the level
         level_temp.pop(i)
