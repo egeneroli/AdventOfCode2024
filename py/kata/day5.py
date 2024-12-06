@@ -16,17 +16,9 @@ updates: list[list[int]] = [[int(x) for x in update.split(",")] for update in up
 
 # part 1 solution
 def correct_order(pages: list[int], order: list[tuple[int, int]]) -> bool:
-    # check if page list is in correct order
-    for i in range(len(pages)-1):
-        page: int = pages[i]
-        next: int = pages[i+1]
-        # loop over all order rules
-        for rule in order:
-            # if rule contains page and next in wrong order (next, page), return False
-            if page == rule[1] and next == rule[0]:
-                return False
-
-    return True
+    # check if page list is in correct order by checking if any pair of pages directly violates an order rule
+    # -- a violating pair is equal to the reverse of a pairwise order rule
+    return not any(tuple(pages[i:i+2][::-1]) in orders for i in range(len(pages)-2))
 
 def part1() -> int:
     # get correct ordered updates
