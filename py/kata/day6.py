@@ -15,7 +15,7 @@ VISITED_PATTERN: str = r"\d"
 OBSTACLE: str = "#"
 OBSTACLE_PATTERN: str = r"\#|X"
 directions: list[str] = ["^", ">", "v", "<"]
-start_pos: tuple[int, int] = tuple([x[0] for x in np.where(np.isin(data_parsed, directions))])
+start_pos: tuple[int, int] = tuple([int(x[0]) for x in np.where(np.isin(data_parsed, directions))])
 start_dir_index: int = directions.index(data_parsed[start_pos])
 # ^ -> row--, > -> col++, v -> row++, < -> col--
 step: list = [lambda pos: (pos[0]-1, pos[1]), lambda pos: (pos[0], pos[1]+1), lambda pos: (pos[0]+1, pos[1]), lambda pos: (pos[0], pos[1]-1)]
@@ -58,96 +58,72 @@ def walk(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, visits: int = 
 def in_bounds(x: np.ndarray[str, str], pos: tuple[int, int]) -> bool:
     return -1 < pos[0] < x.shape[0] and -1 < pos[1] < x.shape[1]
 
-def part1(x: np.ndarray[str, str], pos: tuple[int, int] = start_pos, dir: int = start_dir_index) -> int:
+def patrol(x: np.ndarray[str, str], pos: tuple[int, int] = start_pos, dir: int = start_dir_index) -> int:
+    visited: set[tuple[tuple[int, int], str]] = set()
     # find starting position and direction
     while in_bounds(x, pos):
         pos, dir = walk(x, pos, dir)
+        # print(visited)
+        if (pos, dir) in visited:
+            # print(f"loop detected at {pos}, {dir}")
+            # print(visited)
+            raise Exception("loop detected")
+        visited.add((pos, dir))
     return np.sum(np.vectorize(is_visited)(x))
 
+def part1(x: np.ndarray[str, str]) -> int:
+    return patrol(x)
 data: np.ndarray[str, str] = data_parsed.copy()
 # part1(data)
 print(f"result 1: {part1(data)}\n")
 # print(data)
 
 ## part 2
-RETRACE_THRESHOLD: int = 100
-def is_loop(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, retrace_threshold: int = RETRACE_THRESHOLD, visits: int = int(VISITED)) -> bool:
-    retrace_count: int = 0
+def is_loop(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, visits: int = int(VISITED)) -> bool:
     visited: set[tuple[tuple[int, int], str]] = set()
     while in_bounds(x, pos):
         pos, dir = walk(x, pos, dir, visits)
-        # print(f"pos: {pos}, dir: {dir}, retrace count: {retrace_count}")
-        # print(x)
-        try:  # increment retrace count if next position has been visited already
-            next_pos: tuple[int, int] = step[dir](pos)
-            next_char: str = x[next_pos]
-            if (next_pos, directions[dir]) in visited:
-                return True
-            visited.add((next_pos, directions[dir]))
-        except IndexError:
-            pass
+        if (pos, dir) in visited:
+            return True
+        visited.add((pos, directions[dir]))
     return False
-            # if is_obstacle(next_char):
-            #     if next_pos in visited_obstacles.keys():
-            #         if directions[dir] in visited_obstacles[next_pos]:
-            #             print(visited_obstacles.__len__())
-            #             for obs in visited_obstacles.keys():
-            #                 print(f"obstacle pos: {tuple(int(ob) for ob in obs)}, directions: {visited_obstacles[obs]}")
-            #             return True
-            #         else:
-            #             visited_obstacles[next_pos] += directions[dir]
-            #     else:
-            #         visited_obstacles[next_pos] = directions[dir]
 
-                # print(f"obstacles: {obstacles}")
-                # if visited_obstacles.count(next_pos) >= 2:
-                #     return True
-            # if is_visited(next_char):
-            #     # determine if visited char needs to be updated
-            #     visits = int(next_char) + 1
-            #
-            # #     if visits > 2:
-            # #         retrace_count += 1
-            # #
-            # # # reset retrace count if next position is not visited and not an obstacle
-            # elif not is_obstacle(next_char):
-            #     retrace_count = 0
-        # except IndexError:
-        #     pass
-        # break out if continuously retracing
-        # if retrace_count >= retrace_threshold:
-        #     return True
-        # print(x)
-    # if visited_obstacles.__len__() > 0:
-    #     print(visited_obstacles.__len__())
-    # for obs in visited_obstacles.keys():
-    #     print(f"obstacle pos: {tuple(int(ob) for ob in obs)}, directions: {visited_obstacles[obs]}")
-    # print()
-    # return False
-
-def valid_obstacle_pos(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, retrace_threshold: int = RETRACE_THRESHOLD) -> bool:
+def valid_obstacle_pos(x: np.ndarray[str, str], pos: tuple[int, int], dir: int) -> bool:
     x_temp: np.ndarray[str, str] = x.copy()
     try:
+        if x_temp[step[dir](pos)] == OBSTACLE or step[increment_dir(dir)](pos) == start_pos:
+            return False
         x_temp[step[dir](pos)] = OBSTACLE
     except IndexError:
         return False
-    return is_loop(x_temp, pos, dir, retrace_threshold)
+    return is_loop(x_temp, pos, dir)
 
-def part2(x: np.ndarray[str, str], pos: tuple[int, int] = start_pos, dir: int = start_dir_index, retrace_threshold: int = RETRACE_THRESHOLD) -> int:
+def part2(x: np.ndarray[str, str], pos: tuple[int, int] = start_pos, dir: int = start_dir_index) -> int:
     valid_pos_count: int = 0
-    while in_bounds(x, pos):
-        # while in bounds, patrol/walk like before
-        pos, dir = walk(x, pos, dir)
+    # while in_bounds(x, pos):
+    #     # while in bounds, patrol/walk like before
+    #     pos, dir = walk(x, pos, dir)
+    #
+    #     try:
+    #         x_temp: np.ndarray[str, str] = x.copy()
+    #         x_temp[step[dir](pos)] = OBSTACLE
+    #         patrol(x_temp, pos, dir)
+    #     except Exception:
+    #         valid_pos_count += 1
+    #         print(f"valid obstacle positions: {valid_pos_count}")
+    x_temp: np.ndarray[str, str] = x.copy()
+    x_temp[(6,3)] = OBSTACLE
+    try:
+        result = patrol(x_temp, pos, dir)
+    except Exception:
+        print("loop detected")
+        return valid_pos_count
 
         # after each step, check if putting obstacle in front of guard results in loop
-        if valid_obstacle_pos(x, pos, dir, retrace_threshold):
-            valid_pos_count += 1
-            # print(f"valid obstacle positions: {valid_pos_count}")
+        # if valid_obstacle_pos(x, pos, dir):
+        #     valid_pos_count += 1
+        #     print(f"valid obstacle positions: {valid_pos_count}")
     return valid_pos_count
 
-# data2: np.ndarray[str, str] = data_parsed.copy()
-# print(f"result 2: {part2(data2)}")
-for n in [1, 10, 100, 1000, 10000, 100000, 1000000][:1]:
-    data2: np.ndarray[str, str] = data_parsed.copy()
-    print(f"result 2, n = {n}: {part2(data2, retrace_threshold=n)}")
-    # print(data2)
+data2: np.ndarray[str, str] = data_parsed.copy()
+print(f"result 2: {part2(data2)}")
