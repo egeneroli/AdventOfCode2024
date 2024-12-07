@@ -13,6 +13,7 @@ data_parsed: np.ndarray[str, str] = np.array([list(row) for row in input_str.str
 VISITED: str = "0"
 VISITED_PATTERN: str = r"\d"
 OBSTACLE: str = "#"
+OBSTACLE_PATTERN: str = r"\#|X"
 directions: list[str] = ["^", ">", "v", "<"]
 start_pos: tuple[int, int] = tuple([x[0] for x in np.where(np.isin(data_parsed, directions))])
 start_dir_index: int = directions.index(data_parsed[start_pos])
@@ -24,16 +25,16 @@ import re
 def is_visited(char: str) -> bool:
     return bool(re.match(VISITED_PATTERN, str(char)))
 
-def mark_visited(x: np.ndarray[str, str], pos: tuple[int, int]) -> None:
-    x[pos] = VISITED
+def mark_visited(x: np.ndarray[str, str], pos: tuple[int, int], marker: str = VISITED) -> None:
+    x[pos] = marker
 
 def is_obstacle(char: str) -> bool:
-    return char == OBSTACLE
+    return bool(re.match(OBSTACLE_PATTERN, str(char)))
 
 def increment_dir(dir_index: int) -> int:
     return (dir_index + 1) % 4
 
-def walk(x: np.ndarray[str, str], pos: tuple[int, int], dir: int) -> (int, int):
+def walk(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, visits: int = int(VISITED)) -> (int, int):
     # If there is something directly in front of you, turn right 90 degrees. Otherwise, take a step forward.
     new_pos: tuple[int, int] = step[dir](pos)
     # print(f"pos: {pos}, new_pos: {new_pos}, dir: {dir}")
@@ -41,7 +42,7 @@ def walk(x: np.ndarray[str, str], pos: tuple[int, int], dir: int) -> (int, int):
 
     try: # try to move forward (new_pos might be off the board)
         # mark position as visited
-        mark_visited(x, pos)
+        mark_visited(x, pos, str(visits))
         # if blocked, turn right
         if is_obstacle(x[new_pos]):
             # update direction
@@ -61,39 +62,75 @@ def part1(x: np.ndarray[str, str], pos: tuple[int, int] = start_pos, dir: int = 
     # find starting position and direction
     while in_bounds(x, pos):
         pos, dir = walk(x, pos, dir)
-    # return np.count_nonzero(is_visited(x))
     return np.sum(np.vectorize(is_visited)(x))
-
 
 data: np.ndarray[str, str] = data_parsed.copy()
 # part1(data)
 print(f"result 1: {part1(data)}\n")
+# print(data)
 
 ## part 2
 RETRACE_THRESHOLD: int = 100
-def is_loop(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, retrace_threshold: int = RETRACE_THRESHOLD) -> bool:
+def is_loop(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, retrace_threshold: int = RETRACE_THRESHOLD, visits: int = int(VISITED)) -> bool:
     retrace_count: int = 0
+    visited: set[tuple[tuple[int, int], str]] = set()
     while in_bounds(x, pos):
-        pos, dir = walk(x, pos, dir)
+        pos, dir = walk(x, pos, dir, visits)
         # print(f"pos: {pos}, dir: {dir}, retrace count: {retrace_count}")
         # print(x)
         try:  # increment retrace count if next position has been visited already
-            next_char: str = x[step[dir](pos)]
-            if is_visited(next_char):
-                retrace_count += 1
-            # reset retrace count if next position is not visited and not an obstacle
-            elif not is_obstacle(next_char):
-                retrace_count = 0
+            next_pos: tuple[int, int] = step[dir](pos)
+            next_char: str = x[next_pos]
+            if (next_pos, directions[dir]) in visited:
+                return True
+            visited.add((next_pos, directions[dir]))
         except IndexError:
             pass
-        # break out if continuously retracing
-        if retrace_count >= retrace_threshold:
-            return True
     return False
+            # if is_obstacle(next_char):
+            #     if next_pos in visited_obstacles.keys():
+            #         if directions[dir] in visited_obstacles[next_pos]:
+            #             print(visited_obstacles.__len__())
+            #             for obs in visited_obstacles.keys():
+            #                 print(f"obstacle pos: {tuple(int(ob) for ob in obs)}, directions: {visited_obstacles[obs]}")
+            #             return True
+            #         else:
+            #             visited_obstacles[next_pos] += directions[dir]
+            #     else:
+            #         visited_obstacles[next_pos] = directions[dir]
+
+                # print(f"obstacles: {obstacles}")
+                # if visited_obstacles.count(next_pos) >= 2:
+                #     return True
+            # if is_visited(next_char):
+            #     # determine if visited char needs to be updated
+            #     visits = int(next_char) + 1
+            #
+            # #     if visits > 2:
+            # #         retrace_count += 1
+            # #
+            # # # reset retrace count if next position is not visited and not an obstacle
+            # elif not is_obstacle(next_char):
+            #     retrace_count = 0
+        # except IndexError:
+        #     pass
+        # break out if continuously retracing
+        # if retrace_count >= retrace_threshold:
+        #     return True
+        # print(x)
+    # if visited_obstacles.__len__() > 0:
+    #     print(visited_obstacles.__len__())
+    # for obs in visited_obstacles.keys():
+    #     print(f"obstacle pos: {tuple(int(ob) for ob in obs)}, directions: {visited_obstacles[obs]}")
+    # print()
+    # return False
 
 def valid_obstacle_pos(x: np.ndarray[str, str], pos: tuple[int, int], dir: int, retrace_threshold: int = RETRACE_THRESHOLD) -> bool:
     x_temp: np.ndarray[str, str] = x.copy()
-    x_temp[step[dir](pos)] = OBSTACLE
+    try:
+        x_temp[step[dir](pos)] = OBSTACLE
+    except IndexError:
+        return False
     return is_loop(x_temp, pos, dir, retrace_threshold)
 
 def part2(x: np.ndarray[str, str], pos: tuple[int, int] = start_pos, dir: int = start_dir_index, retrace_threshold: int = RETRACE_THRESHOLD) -> int:
@@ -110,6 +147,7 @@ def part2(x: np.ndarray[str, str], pos: tuple[int, int] = start_pos, dir: int = 
 
 # data2: np.ndarray[str, str] = data_parsed.copy()
 # print(f"result 2: {part2(data2)}")
-for n in [1, 10, 100, 1000, 10000, 100000, 1000000][:5]:
+for n in [1, 10, 100, 1000, 10000, 100000, 1000000][:1]:
     data2: np.ndarray[str, str] = data_parsed.copy()
     print(f"result 2, n = {n}: {part2(data2, retrace_threshold=n)}")
+    # print(data2)
