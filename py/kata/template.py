@@ -1,23 +1,33 @@
-from py.util import read_input, parse_int_matrix
+from py.util import read_input
 
 # read in data
 input_str: str = read_input("input3")
 
-# parse into nested list of ints
-data: list[list[int]] = parse_int_matrix(input_str.split("\n"))
-
 # part 1 solution
+class Part1:
+    def __init__(self) -> None:
+        # parse data
+        self.mat: list[list[str]] = [list(row) for row in input_str.strip().split("\n")]
+
+    def run(self) -> int:
+        return -1
+
 def part1() -> int:
-    return -1
+    return Part1().run()
 
 print(f"result 1: {part1()}\n")
 
-## part 2
-# part 2 solution
-def part2() -> int:
-    return -1
 
-print(f"result 2: {part2()}")
+## part 2
+class Part2(Part1):
+
+    def run(self) -> int:
+        return -1
+
+def part2() -> int:
+    return Part2().run()
+
+print(f"result 2: {part2()}\n")
 
 
 
