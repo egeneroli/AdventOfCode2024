@@ -7,3 +7,4 @@ def read_input(filename: str, print_input: bool = True) -> str:
 
 def parse_int_matrix(lines: list[str]) -> list[list[int]]:
     return [[int(x) for x in line.split()] for line in lines]
+
