@@ -6,7 +6,8 @@ class Part1(AOCKata):
         # call parent constructor to read in data
         super().__init__(9, test, print_input)
         # parse data
-        self.mat: list[list[str]] = [list(row) for row in self.input_str.strip().split("\n")]
+        self.disk_map: list[int] = [int(x) for x in list(self.input_str)]
+        print(f"data: {self.disk_map}")
 
     def run(self) -> int:
         return -1
