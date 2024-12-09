@@ -33,3 +33,6 @@ def read_input(filename: str, print_input: bool = True) -> str:
         if print_input:
             print(f"input: \n{file}\n")
         return file.strip()
+
+def str_replace(index: int, char: str, s: str) -> str:
+    return s[:index] + char + s[index+1:]
