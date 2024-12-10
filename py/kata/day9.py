@@ -119,8 +119,8 @@ class Part2(Day9):
                     # place file in space
                     self.diskmap[i] = file
                     # replace file with dots
-                    file_index: int = len(self.diskmap) - 1 - self.diskmap[::-1].index(file)
-                    self.diskmap[file_index] = "."*len(file)
+                    file_index: int = self.get_file_index(file)
+                    self.diskmap[file_index] = "."*file_size
                     # insert remainder if exists
                     if space_size > file_size:
                         self.diskmap.insert(i+1, "."*(space_size - file_size))
@@ -182,8 +182,34 @@ class Part2(Day9):
         print(self.diskmap)
         disk_map_str = "".join(self.diskmap)
         print(disk_map_str)
+
+        # break up blocks to calculate checksum?
+        # print(f"is repeating: {is_repeating}")
+        lst = self.split_repeated(disk_map_str)
+        print(f"repeating: {lst}")
+
         # calculate "filesystem checksum" from final disk map by summing the product of each index and its value
-        return self.calculate_checksum(self.diskmap)
+        return self.calculate_checksum(lst)
+
+    def calculate_checksum(self, disk_map_lst: list[str]) -> int:
+        # return sum(i * int(x) for i, x in enumerate(disk_map_lst) if x.isdigit())
+        for i, x in enumerate(disk_map_lst):
+            if x.isdigit():
+                print(f"i: {i}, x: {x}, i*x: {i * int(x)}")
+        return -1
+
+
+    def split_repeated(self, s: str) -> list[str]:
+        lst: list[str] = []
+        for x in self.diskmap:
+            if self.is_repeating(x):
+                lst.extend(list(x))
+            else:
+                lst.append(x)
+        return lst
+
+    def is_repeating(self, s: str) -> bool:
+        return bool(re.match(r"(\d+?)\1+", s))
 
 def part2() -> int:
     return Part2(test=True, print_input=False).run()
