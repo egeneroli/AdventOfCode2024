@@ -84,7 +84,14 @@ def rearrange_file_by_blocks(free_space_queue: FreeSpaceQueue, file: list[str]) 
 
 
 def file_system_checksum(file: list[str]) -> int:
-    return sum(k * int(chr) for k, chr in enumerate(file) if chr.isdigit())
+    # return sum(k * int(chr) for k, chr in enumerate(file) if chr.isdigit())
+    count: int = 0
+    for i, x in enumerate(file):
+        if x.isdigit():
+            print(f"i: {i}, id: {x}, i*x: {i * int(x)}, count: {count}")
+            count += i * int(x)
+    print(f"count: {count}")
+    return count
 
 
 # Test
@@ -95,6 +102,7 @@ free_space_locs_test, free_blocks_test, test_file = parse_disk(disk_map_test)
 test_ordered_file = rearrange_file(free_space_locs_test, list(test_file))
 assert file_system_checksum(test_ordered_file) == 1928
 assert file_system_checksum(rearrange_file_by_blocks(free_blocks_test, test_file)) == 2858
+print(f"part 2 test: {rearrange_file_by_blocks(free_blocks_test, test_file)}")
 
 # Main
 disk_map = load_disk_map(input_dir + ".txt")
@@ -102,5 +110,5 @@ free_space_locs, free_blocks, file = parse_disk(disk_map)
 ordered_file = rearrange_file(free_space_locs, list(file))  # wrap in list so original file object is protected
 # ordered_file_by_blocks = rearrange_file_by_blocks(free_blocks, file)
 # print(ordered_file)
-print(f"Part 1: {file_system_checksum(ordered_file)}")
+# print(f"Part 1: {file_system_checksum(ordered_file)}")
 # print(f"Part 2: {file_system_checksum(ordered_file_by_blocks)}")
