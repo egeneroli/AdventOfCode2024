@@ -16,7 +16,7 @@ class Part1(AOCKata):
         # check if position is on the grid
         return (0 <= pos[0] < self.X.shape[0]) and (0 <= pos[1] < self.X.shape[1])
 
-    def count(self, pos: tuple[int, int], starting_pos: tuple[int, int],
+    def count_og(self, pos: tuple[int, int], starting_pos: tuple[int, int],
               trailheads: dict[tuple[int, int], int], visited: set[tuple[int, int]] = None) -> None:
         # call recursive method to traverse paths and count them if they reach completion
         # args: trailheads map, current position, trailhead started from,
@@ -45,7 +45,7 @@ class Part1(AOCKata):
                 visited_temp.add(move)
                 self.count(move, starting_pos, trailheads, visited_temp)
 
-    def count2(self, data: np.ndarray[int, int], pos: tuple[int, int], END_CHAR: str = "9") -> int:
+    def count(self, data: np.ndarray[int, int], pos: tuple[int, int], END_CHAR: str = "9") -> int:
         # recursive method to traverse paths and count them if they reach completion
         # base case
         if data[pos] == END_CHAR:
@@ -56,7 +56,7 @@ class Part1(AOCKata):
         for move in [(pos[0] + 1, pos[1]), (pos[0] - 1, pos[1]), (pos[0], pos[1] + 1), (pos[0], pos[1] - 1)]:
             # check if move is valid
             if self.on_grid(move) and data[move] == data[pos] + 1:
-                count += self.count2(data, move)
+                count += self.count(data, move)
         return count
 
     def run(self) -> int:
@@ -78,7 +78,7 @@ class Part1(AOCKata):
         for pos in indexes:
             # call recursive method to traverse paths and count them if they reach completion
             # self.count(pos, pos, trailheads)
-            trailheads[pos] = self.count2(X, pos)
+            trailheads[pos] = self.count(X, pos)
 
         print(trailheads)
 
